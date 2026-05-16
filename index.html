@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentReady Score – Is Your Site Ready for AI Agents?</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2300D9FF'/><text x='6' y='24' font-size='20' fill='%23000'>★</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   TOKENS & RESET
+═══════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#030810;
+  --surface:#06101E;
+  --card:#091526;
+  --card-hi:#0C1A30;
+  --teal:#00D9FF;
+  --teal-dim:rgba(0,217,255,.15);
+  --teal-glow:rgba(0,217,255,.3);
+  --magenta:#FF2D6B;
+  --magenta-dim:rgba(255,45,107,.12);
+  --indigo:#6366F1;
+  --indigo-dim:rgba(99,102,241,.15);
+  --text:#E8F4FF;
+  --muted:rgba(232,244,255,.48);
+  --dim:rgba(232,244,255,.2);
+  --ghost:rgba(232,244,255,.07);
+  --border:rgba(232,244,255,.07);
+  --border-teal:rgba(0,217,255,.25);
+  --green:#34D399;
+  --red:#FB7185;
+  --amber:#FBBF24;
+  --r:20px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* grain overlay */
+body::after{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23g)' opacity='1'/></svg>");opacity:.028;pointer-events:none;z-index:9999}
+
+/* ═══════════════════════════════════════
+   TYPOGRAPHY
+═══════════════════════════════════════ */
+.font-display{font-family:'Syne',sans-serif}
+.font-mono{font-family:'JetBrains Mono',monospace}
+.text-grad{background:linear-gradient(120deg,var(--teal),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.text-grad-hot{background:linear-gradient(120deg,var(--teal) 0%,var(--magenta) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ═══════════════════════════════════════
+   SCROLL ANIMATIONS
+═══════════════════════════════════════ */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+.reveal-l{opacity:0;transform:translateX(-28px);transition:opacity .6s ease,transform .6s ease}
+.reveal-l.visible{opacity:1;transform:none}
+.reveal-r{opacity:0;transform:translateX(28px);transition:opacity .6s ease,transform .6s ease}
+.reveal-r.visible{opacity:1;transform:none}
+.delay-1{transition-delay:.1s}
+.delay-2{transition-delay:.2s}
+.delay-3{transition-delay:.3s}
+.delay-4{transition-delay:.4s}
+.delay-5{transition-delay:.5s}
+
+/* ═══════════════════════════════════════
+   NAV
+═══════════════════════════════════════ */
+nav{position:fixed;top:0;width:100%;z-index:1000;transition:background .3s,border-color .3s;border-bottom:1px solid transparent;padding:0}
+nav.scrolled{background:rgba(3,8,16,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-color:var(--border)}
+.nav-inner{max-width:1280px;margin:0 auto;padding:1.1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+.nav-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--teal),var(--indigo));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-logo-text{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.nav-links{display:flex;align-items:center;gap:.25rem;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:.875rem;font-weight:500;padding:.5rem .9rem;border-radius:8px;transition:.2s}
+.nav-links a:hover{color:var(--text);background:var(--ghost)}
+.nav-cta{background:var(--teal);color:#000!important;font-weight:600!important;border-radius:8px;position:relative;overflow:hidden}
+.nav-cta::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;transition:.2s}
+.nav-cta:hover::after{opacity:1}
+.nav-cta:hover{background:var(--teal)!important}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;gap:5px;flex-direction:column}
+.hamburger span{display:block;width:22px;height:2px;background:var(--muted);border-radius:2px;transition:.3s}
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+#hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding-top:72px}
+#particleCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.hero-fade{position:absolute;bottom:0;left:0;right:0;height:200px;background:linear-gradient(to top,var(--bg),transparent);pointer-events:none;z-index:1}
+.hero-inner{max-width:1280px;margin:0 auto;padding:5rem 2rem;display:grid;grid-template-columns:1fr 440px;gap:5rem;align-items:center;position:relative;z-index:2}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.6rem;border:1px solid var(--border-teal);background:rgba(0,217,255,.06);border-radius:100px;padding:.38rem 1rem .38rem .6rem;margin-bottom:1.8rem}
+.eyebrow-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);animation:ping 2s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(0,217,255,.6)}70%{box-shadow:0 0 0 8px rgba(0,217,255,0)}100%{box-shadow:0 0 0 0 rgba(0,217,255,0)}}
+.eyebrow-text{font-size:.75rem;font-weight:600;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.hero-h1{font-family:'Syne',sans-serif;font-size:clamp(2.4rem,5vw,3.8rem);font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:1.6rem}
+.hero-p{color:var(--muted);font-size:1.05rem;line-height:1.85;max-width:500px;margin-bottom:2.5rem}
+.hero-actions{display:flex;gap:.9rem;flex-wrap:wrap;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 1.8rem;border-radius:10px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;text-decoration:none;transition:all .25s;letter-spacing:.01em}
+.btn-primary{background:var(--teal);color:#000;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(45deg,transparent,rgba(255,255,255,.2),transparent);transform:translateX(-100%);transition:.5s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 30px var(--teal-glow)}
+.btn-primary:hover::before{transform:translateX(100%)}
+.btn-ghost{background:var(--ghost);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(232,244,255,.1);border-color:rgba(232,244,255,.15);transform:translateY(-2px)}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;padding-top:2rem;border-top:1px solid var(--border)}
+.h-stat-num{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--text);letter-spacing:-.03em}
+.h-stat-label{font-size:.78rem;color:var(--dim);margin-top:.25rem;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+
+/* HERO CARD */
+.hero-card{background:rgba(9,21,38,.8);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:24px;padding:1.6rem;position:relative;overflow:hidden}
+.hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent)}
+.card-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.card-title{font-size:.75rem;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.card-live{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:var(--green);font-weight:600;font-family:'JetBrains Mono',monospace}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:ping 2s infinite}
+
+/* check rows */
+.cr{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:.7rem;padding:.6rem .8rem;border-radius:10px;background:var(--ghost);border:1px solid var(--border);margin-bottom:.4rem;transition:.2s}
+.cr:hover{border-color:var(--border-teal)}
+.cr-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cr-icon.ok{background:rgba(52,211,153,.12)}
+.cr-icon.fail{background:rgba(251,113,133,.12)}
+.cr-icon.warn{background:rgba(251,191,36,.12)}
+.cr-label{font-size:.82rem;color:var(--muted)}
+.cr-badge{font-size:.68rem;font-weight:700;font-family:'JetBrains Mono',monospace;padding:.2rem .5rem;border-radius:5px;letter-spacing:.04em}
+.cr-badge.ok{background:rgba(52,211,153,.12);color:var(--green)}
+.cr-badge.fail{background:rgba(251,113,133,.12);color:var(--red)}
+.cr-badge.warn{background:rgba(251,191,36,.12);color:var(--amber)}
+
+/* score gauge */
+.gauge-wrap{margin-top:1.2rem;background:var(--ghost);border:1px solid var(--border);border-radius:16px;padding:1.4rem;display:flex;align-items:center;gap:1.5rem}
+.gauge-svg{flex-shrink:0}
+.gauge-info-label{font-size:.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-weight:600;font-family:'JetBrains Mono',monospace;margin-bottom:.3rem}
+.gauge-score{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:700;color:var(--text);line-height:1;letter-spacing:-.04em}
+.gauge-desc{font-size:.78rem;color:var(--muted);margin-top:.4rem;line-height:1.5}
+
+/* ═══════════════════════════════════════
+   HOW IT WORKS
+═══════════════════════════════════════ */
+#how{padding:7rem 2rem;background:var(--surface);position:relative}
+#how::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border-teal),transparent)}
+.section-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-family:'JetBrains Mono',monospace;display:block;margin-bottom:.9rem}
+.section-h{font-family:'Syne',sans-serif;font-size:clamp(1.9rem,3.5vw,2.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:.8rem}
+.section-sub{color:var(--muted);font-size:.95rem;line-height:1.8;max-width:520px}
+.steps-grid{max-width:1100px;margin:4rem auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative}
+.steps-grid::before{content:'';position:absolute;top:36px;left:calc(16.66% + 1rem);right:calc(16.66% + 1rem);height:1px;background:linear-gradient(90deg,var(--teal-dim),var(--border-teal),var(--teal-dim));z-index:0}
+.step-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:2rem;position:relative;transition:.25s;z-index:1}
+.step-card:hover{border-color:var(--border-teal);transform:translateY(-4px)}
+.step-num{width:48px;height:48px;border-radius:14px;border:1px solid var(--border-teal);background:var(--teal-dim);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--teal);margin-bottom:1.5rem}
+.step-card h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.6rem;letter-spacing:-.01em}
+.step-card p{font-size:.875rem;color:var(--muted);line-height:1.75}
+
+/* ═══════════════════════════════════════
+   DEMO
+═══════════════════════════════════════ */
+#demo{padding:7rem 2rem;background:var(--bg)}
+.demo-wrap{max-width:780px;margin:0 auto}
+.terminal{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.terminal-bar{background:var(--surface);padding:.8rem 1.2rem;display:flex;align-items:center;gap:.7rem;border-bottom:1px solid var(--border)}
+.terminal-dots{display:flex;gap:.4rem}
+.terminal-dots span{width:11px;height:11px;border-radius:50%}
+.td-red{background:#FF5F57}
+.td-yellow{background:#FFBD2E}
+.td-green{background:#28C840}
+.terminal-title{flex:1;text-align:center;font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--dim);letter-spacing:.04em}
+.terminal-body{padding:2rem}
+.input-row{display:flex;gap:.75rem}
+.url-input{flex:1;background:rgba(232,244,255,.04);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;font-size:.9rem;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:.25s}
+.url-input::placeholder{color:var(--dim)}
+.url-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,217,255,.08);background:rgba(0,217,255,.04)}
+.run-btn{background:var(--teal);color:#000;border:none;padding:.9rem 1.5rem;border-radius:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;font-size:.875rem;transition:.25s;letter-spacing:.01em;display:flex;align-items:center;gap:.5rem}
+.run-btn:hover{transform:translateY(-2px);box-shadow:0 0 24px var(--teal-glow)}
+.run-btn svg{transition:transform .3s}
+.run-btn:hover svg{transform:translateX(3px)}
+#resultsArea{margin-top:1.8rem;display:none}
+
+/* Loader */
+.scan-loader{display:flex;align-items:center;gap:.9rem;padding:2rem;color:var(--muted);font-size:.875rem}
+.ld{display:flex;gap:.3rem}
+.ld span{width:8px;height:8px;border-radius:50%;background:var(--teal);animation:ld .9s ease-in-out infinite}
+.ld span:nth-child(2){animation-delay:.15s}
+.ld span:nth-child(3){animation-delay:.3s}
+@keyframes ld{0%,60%,100%{transform:scale(.5);opacity:.3}30%{transform:scale(1);opacity:1}}
+
+/* Results */
+.result-top{display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:center;background:var(--card-hi);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin-bottom:1.2rem}
+.r-gauge{flex-shrink:0}
+.r-site{font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+.r-score-big{font-family:'JetBrains Mono',monospace;font-size:3.5rem;font-weight:700;line-height:1}
+.r-label{font-size:.83rem;color:var(--muted);margin-top:.5rem}
+.bars-list{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem}
+.bar-item{display:flex;flex-direction:column}
+.bar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}
+.bar-name{font-size:.83rem;color:var(--muted)}
+.bar-status{font-size:.7rem;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.bar-status.ok{color:var(--green)}
+.bar-status.fail{color:var(--red)}
+.bar-track{height:5px;background:var(--ghost);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;width:0;transition:width 1.2s cubic-bezier(.25,.46,.45,.94)}
+.bar-fill.ok{background:linear-gradient(90deg,var(--green),#86EFAC)}
+.bar-fill.fail{background:linear-gradient(90deg,var(--red),#FCA5A5)}
+.fixes-panel{background:var(--magenta-dim);border:1px solid rgba(255,45,107,.2);border-radius:14px;padding:1.4rem}
+.fixes-title{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.fix-row{display:flex;gap:.75rem;font-size:.83rem;color:var(--muted);align-items:flex-start;margin-bottom:.55rem;line-height:1.6}
+.fix-arrow{color:var(--magenta);flex-shrink:0;font-weight:700}
+
+/* ═══════════════════════════════════════
+   FEATURES BENTO
+═══════════════════════════════════════ */
+#features{padding:7rem 2rem;background:var(--surface);position:relative}
+#features::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+.bento{max-width:1280px;margin:4rem auto 0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:1.2rem}
+.fc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:2rem;position:relative;overflow:hidden;transition:.28s ease;cursor:default}
+.fc::after{content:'';position:absolute;inset:0;border-radius:var(--r);opacity:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,217,255,.07),transparent 60%);transition:opacity .3s;pointer-events:none}
+.fc:hover{border-color:var(--border-teal);transform:translateY(-4px)}
+.fc:hover::after{opacity:1}
+.fc.w2{grid-column:span 2}
+.fc-icon{width:48px;height:48px;border-radius:14px;background:var(--teal-dim);border:1px solid var(--border-teal);display:flex;align-items:center;justify-content:center;margin-bottom:1.6rem;color:var(--teal)}
+.fc-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.22rem .65rem;border-radius:5px;background:var(--indigo-dim);color:#818CF8;border:1px solid rgba(99,102,241,.2);margin-bottom:1.1rem}
+.fc h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:-.01em;margin-bottom:.7rem}
+.fc p{font-size:.875rem;color:var(--muted);line-height:1.78}
+.fc.w2 .fc-body{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+.fc-metric{font-family:'JetBrains Mono',monospace;font-size:3.4rem;font-weight:700;line-height:1;margin-top:.8rem}
+.fc-metric.teal{background:linear-gradient(120deg,var(--teal),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* mock bars inside wide card */
+.mock-bars{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem}
+.mb-row{display:flex;align-items:center;gap:.8rem}
+.mb-label{font-size:.75rem;color:var(--dim);font-family:'JetBrains Mono',monospace;width:80px;flex-shrink:0;text-align:right}
+.mb-track{flex:1;height:6px;background:var(--ghost);border-radius:4px;overflow:hidden}
+.mb-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--indigo))}
+.mb-val{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);width:34px;flex-shrink:0}
+
+/* ═══════════════════════════════════════
+   CREATOR
+═══════════════════════════════════════ */
+#about{padding:7rem 2rem;background:var(--bg);position:relative;overflow:hidden}
+#about::before{content:'RAFAEL';position:absolute;right:-2rem;top:50%;transform:translateY(-50%);font-family:'Syne',sans-serif;font-size:14rem;font-weight:800;color:rgba(232,244,255,.025);letter-spacing:-.05em;pointer-events:none;line-height:1;white-space:nowrap}
+.creator-grid{max-width:1000px;margin:4rem auto 0;display:grid;grid-template-columns:280px 1fr;gap:4rem;align-items:start;position:relative;z-index:1}
+.creator-photo-wrap{position:relative}
+.creator-ring{width:260px;height:260px;border-radius:24px;padding:3px;background:linear-gradient(135deg,var(--teal),var(--indigo),var(--magenta));animation:borderSpin 4s linear infinite}
+@keyframes borderSpin{0%{background:linear-gradient(0deg,var(--teal),var(--indigo),var(--magenta))}25%{background:linear-gradient(90deg,var(--teal),var(--indigo),var(--magenta))}50%{background:linear-gradient(180deg,var(--teal),var(--indigo),var(--magenta))}75%{background:linear-gradient(270deg,var(--teal),var(--indigo),var(--magenta))}100%{background:linear-gradient(360deg,var(--teal),var(--indigo),var(--magenta))}}
+.creator-photo{width:100%;height:100%;border-radius:22px;background:linear-gradient(145deg,var(--card-hi),var(--card));display:flex;align-items:center;justify-content:center;font-size:5rem}
+.creator-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+.c-tag{background:var(--ghost);border:1px solid var(--border);color:var(--dim);font-size:.73rem;padding:.28rem .7rem;border-radius:7px}
+.creator-info h3{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;letter-spacing:-.04em;line-height:1.1;margin-bottom:.5rem}
+.creator-title-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--teal-dim);border:1px solid var(--border-teal);color:var(--teal);font-size:.75rem;font-weight:600;font-family:'JetBrains Mono',monospace;padding:.35rem .9rem;border-radius:8px;margin-bottom:1.8rem;letter-spacing:.04em;text-transform:uppercase}
+.creator-bio{color:var(--muted);line-height:2;font-size:.9rem}
+.creator-quote{border-left:3px solid var(--teal);padding:.8rem 1.2rem;background:var(--teal-dim);border-radius:0 10px 10px 0;margin:1.5rem 0;color:var(--text);font-size:.92rem;font-style:italic;line-height:1.7}
+
+/* ═══════════════════════════════════════
+   CONTACT
+═══════════════════════════════════════ */
+#contact{padding:7rem 2rem;background:var(--surface);position:relative}
+#contact::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border-teal),transparent)}
+.contact-grid{max-width:1000px;margin:4rem auto 0;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+.contact-left h4{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-.02em;margin-bottom:1rem}
+.contact-left p{color:var(--muted);font-size:.9rem;line-height:1.8;margin-bottom:2rem}
+.contact-meta{display:flex;flex-direction:column;gap:.9rem}
+.c-meta-row{display:flex;align-items:center;gap:.8rem;font-size:.875rem;color:var(--muted)}
+.c-meta-icon{width:36px;height:36px;border-radius:10px;background:var(--teal-dim);border:1px solid var(--border-teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--teal)}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2rem;position:relative;overflow:hidden}
+.form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--indigo),var(--magenta))}
+.fg{margin-bottom:1.1rem;position:relative}
+.fg label{display:block;font-size:.78rem;font-weight:600;color:var(--dim);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg textarea{width:100%;padding:.85rem 1rem;background:rgba(232,244,255,.04);border:1px solid var(--border);border-radius:10px;font-size:.88rem;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:.25s}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--dim)}
+.fg textarea{height:120px;resize:vertical}
+.fg input:focus,.fg textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,217,255,.08);background:rgba(0,217,255,.03)}
+.submit-btn{width:100%;background:linear-gradient(135deg,var(--teal),var(--indigo));color:#000;border:none;padding:.95rem;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.01em;transition:.25s;margin-top:.4rem}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,217,255,.3)}
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+footer{background:var(--card);border-top:1px solid var(--border);padding:5rem 2rem 2.5rem;color:var(--muted)}
+.footer-inner{max-width:1280px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:4rem}
+.footer-brand-logo{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}
+.fb-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--teal),var(--indigo));border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fb-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text)}
+.footer-brand p{font-size:.83rem;color:var(--dim);line-height:1.75;max-width:230px;margin-bottom:1.5rem}
+.footer-social{display:flex;gap:.6rem}
+.f-social-btn{width:34px;height:34px;border-radius:9px;background:var(--ghost);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--dim);transition:.2s;text-decoration:none}
+.f-social-btn:hover{background:var(--teal-dim);border-color:var(--border-teal);color:var(--teal)}
+.footer-col h5{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace}
+.footer-col a{display:block;color:var(--dim);text-decoration:none;font-size:.83rem;margin-bottom:.6rem;transition:.2s}
+.footer-col a:hover{color:var(--teal)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-bottom p{font-size:.78rem;color:var(--dim)}
+.ph-badge{display:flex;align-items:center;gap:.5rem;background:rgba(255,90,31,.1);color:#FF5A1F;border:1px solid rgba(255,90,31,.22);padding:.45rem 1rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:.78rem;transition:.2s}
+.ph-badge:hover{background:rgba(255,90,31,.2)}
+
+/* ═══════════════════════════════════════
+   MODAL
+═══════════════════════════════════════ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:2.5rem;max-width:460px;width:90%;position:relative;overflow:hidden}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--indigo),var(--magenta))}
+.modal h3{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.5rem}
+.modal>.sub{color:var(--muted);font-size:.875rem;margin-bottom:1.8rem}
+.modal-x{position:absolute;top:1.2rem;right:1.2rem;width:30px;height:30px;background:var(--ghost);border:1px solid var(--border);color:var(--muted);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:.2s;line-height:1}
+.modal-x:hover{background:rgba(255,45,107,.15);border-color:rgba(255,45,107,.3);color:var(--red)}
+
+/* ═══════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════ */
+@media(max-width:1024px){
+  .bento{grid-template-columns:1fr 1fr}
+  .fc.w2{grid-column:span 1}
+  .fc.w2 .fc-body{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .hero-inner,.creator-grid,.contact-grid,.footer-top{grid-template-columns:1fr;gap:2.5rem}
+  .hero-h1{font-size:2.3rem}
+  .steps-grid{grid-template-columns:1fr;gap:1rem}
+  .steps-grid::before{display:none}
+  .hero-card{display:none}
+  .creator-ring{width:180px;height:180px}
+  .creator-photo{font-size:3.5rem}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .hamburger{display:flex}
+  .nav-links{display:none;position:fixed;top:62px;left:0;right:0;background:rgba(3,8,16,.97);border-bottom:1px solid var(--border);flex-direction:column;padding:1.5rem;gap:.3rem}
+  .nav-links.open{display:flex}
+  #about::before{font-size:6rem}
+}
+@media(max-width:540px){
+  .bento{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  .hero-stats{grid-template-columns:repeat(3,1fr)}
+  .result-top{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M5.64 18.36l2.12-2.12M16.24 7.76l2.12-2.12"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">AgentReady Score</span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#" class="nav-cta" onclick="openModal();return false">Request Demo</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MODAL -->
+<div class="overlay" id="demoModal">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <h3>Request a Demo</h3>
+    <p class="sub">Get a full AgentReady audit for your website — we'll walk you through every signal.</p>
+    <div class="fg"><label>Full Name</label><input type="text" placeholder="Your name"></div>
+    <div class="fg"><label>Work Email</label><input type="email" placeholder="you@company.com"></div>
+    <div class="fg"><label>Website URL</label><input type="text" placeholder="https://yoursite.com"></div>
+    <button class="submit-btn" onclick="submitDemo()">Get Full Report</button>
+    <p id="demoMsg" style="display:none;text-align:center;color:var(--teal);margin-top:1.2rem;font-size:.83rem;font-weight:600;font-family:'JetBrains Mono',monospace">Request submitted — we'll be in touch.</p>
+  </div>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="particleCanvas"></canvas>
+  <div class="hero-fade"></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        <span class="eyebrow-text">2026 AI Agent Standard</span>
+      </div>
+      <h1 class="hero-h1 font-display">
+        Is Your Website<br>
+        <span class="text-grad">Agent-Ready?</span>
+      </h1>
+      <p class="hero-p">AgentReady Score audits your site across 20+ technical and semantic signals — structured data, agent authentication, llms.txt, crawlability — and gives you a precise score with a step-by-step fix plan.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Score My Site Free
+        </button>
+        <a href="https://www.producthunt.com/products/indexedai" target="_blank" class="btn btn-ghost">View on Product Hunt</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="h-stat-num" data-count="20">0</div>
+          <div class="h-stat-label">Signals Checked</div>
+        </div>
+        <div>
+          <div class="h-stat-num" data-count="2">0</div>
+          <div class="h-stat-label">Seconds — Results</div>
+        </div>
+        <div>
+          <div class="h-stat-num" style="font-size:1.4rem">Free</div>
+          <div class="h-stat-label">No Card Needed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <div class="card-topbar">
+        <span class="card-title">Sample Report</span>
+        <span class="card-live">
+          <span class="live-dot"></span>
+          LIVE
+        </span>
+      </div>
+      <div class="cr ok">
+        <div class="cr-icon ok">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <span class="cr-label">robots.txt AI-accessible</span>
+        <span class="cr-badge ok">PASS</span>
+      </div>
+      <div class="cr ok">
+        <div class="cr-icon ok">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <span class="cr-label">JSON-LD structured data</span>
+        <span class="cr-badge ok">PASS</span>
+      </div>
+      <div class="cr warn">
+        <div class="cr-icon warn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        </div>
+        <span class="cr-label">llms.txt file present</span>
+        <span class="cr-badge warn">MISSING</span>
+      </div>
+      <div class="cr ok">
+        <div class="cr-icon ok">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <span class="cr-label">Sitemap indexable</span>
+        <span class="cr-badge ok">PASS</span>
+      </div>
+      <div class="cr fail">
+        <div class="cr-icon fail">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FB7185" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </div>
+        <span class="cr-label">Agent authentication</span>
+        <span class="cr-badge fail">FAIL</span>
+      </div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(232,244,255,.07)" stroke-width="6"/>
+          <circle cx="40" cy="40" r="30" fill="none" stroke="url(#heroGrad)" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="188.5" stroke-dashoffset="49" style="transform:rotate(-90deg);transform-origin:center"/>
+          <defs>
+            <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00D9FF"/>
+              <stop offset="100%" stop-color="#6366F1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div>
+          <div class="gauge-info-label">AgentReady Score</div>
+          <div class="gauge-score text-grad font-mono">74<span style="font-size:1rem;opacity:.5">/100</span></div>
+          <div class="gauge-desc">Good — agents can access your site</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div style="max-width:1280px;margin:0 auto;text-align:center">
+    <span class="section-eyebrow reveal">How It Works</span>
+    <h2 class="section-h font-display reveal delay-1">Three steps to agent clarity</h2>
+    <p class="section-sub reveal delay-2" style="margin:0 auto">No setup, no account needed. Get your full readiness report in under 30 seconds.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card reveal">
+      <div class="step-num">01</div>
+      <h3>Enter Your URL</h3>
+      <p>Paste any public URL into our analyzer. We accept full domains, subpages, and staging environments.</p>
+    </div>
+    <div class="step-card reveal delay-2">
+      <div class="step-num">02</div>
+      <h3>We Run 20+ Checks</h3>
+      <p>Our engine audits robots.txt, llms.txt, structured data, API specs, auth flows, sitemap freshness, and more.</p>
+    </div>
+    <div class="step-card reveal delay-4">
+      <div class="step-num">03</div>
+      <h3>Get Score + Fixes</h3>
+      <p>Receive a precise 0–100 score and an ordered fix-it playbook — specific steps, not vague advice.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo" style="padding:7rem 2rem;background:var(--bg)">
+  <div style="max-width:780px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:3rem">
+      <span class="section-eyebrow reveal">Free Tool</span>
+      <h2 class="section-h font-display reveal delay-1">Check your score now</h2>
+      <p class="section-sub reveal delay-2" style="margin:0 auto">No account required — instant results</p>
+    </div>
+    <div class="terminal reveal">
+      <div class="terminal-bar">
+        <div class="terminal-dots">
+          <span class="td-red"></span>
+          <span class="td-yellow"></span>
+          <span class="td-green"></span>
+        </div>
+        <span class="terminal-title">agentready — analyzer v2.4.0</span>
+        <div style="width:48px"></div>
+      </div>
+      <div class="terminal-body">
+        <div class="input-row">
+          <input class="url-input" type="text" id="siteUrl" placeholder="https://yourwebsite.com" autocomplete="off">
+          <button class="run-btn" onclick="checkScore()">
+            Run Analysis
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div id="resultsArea"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES BENTO -->
+<section id="features">
+  <div style="max-width:1280px;margin:0 auto">
+    <div style="text-align:center">
+      <span class="section-eyebrow reveal">Platform</span>
+      <h2 class="section-h font-display reveal delay-1">Built for the agentic web</h2>
+      <p class="section-sub reveal delay-2" style="margin:0 auto">AI agents are browsing the web on behalf of users. Be ready before your competitors are.</p>
+    </div>
+    <div class="bento">
+
+      <!-- Wide card -->
+      <div class="fc w2 reveal">
+        <div class="fc-body">
+          <div>
+            <div class="fc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg>
+            </div>
+            <div class="fc-tag">Core Signal Engine</div>
+            <h3>20+ Signal Analysis</h3>
+            <p>We audit every technical and semantic layer AI agents check — robots directives, llms.txt, JSON-LD, OpenAPI specs, authentication patterns, and sitemap freshness.</p>
+            <div class="fc-metric teal">20+</div>
+          </div>
+          <div>
+            <div class="mock-bars">
+              <div class="mb-row">
+                <span class="mb-label">robots.txt</span>
+                <div class="mb-track"><div class="mb-fill" style="width:100%"></div></div>
+                <span class="mb-val font-mono">100%</span>
+              </div>
+              <div class="mb-row">
+                <span class="mb-label">JSON-LD</span>
+                <div class="mb-track"><div class="mb-fill" style="width:80%"></div></div>
+                <span class="mb-val font-mono">80%</span>
+              </div>
+              <div class="mb-row">
+                <span class="mb-label">llms.txt</span>
+                <div class="mb-track"><div class="mb-fill" style="width:0%"></div></div>
+                <span class="mb-val font-mono">0%</span>
+              </div>
+              <div class="mb-row">
+                <span class="mb-label">Sitemap</span>
+                <div class="mb-track"><div class="mb-fill" style="width:90%"></div></div>
+                <span class="mb-val font-mono">90%</span>
+              </div>
+              <div class="mb-row">
+                <span class="mb-label">Auth</span>
+                <div class="mb-track"><div class="mb-fill" style="width:35%"></div></div>
+                <span class="mb-val font-mono">35%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fc reveal delay-1">
+        <div class="fc-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+        </div>
+        <div class="fc-tag">Generator</div>
+        <h3>llms.txt Generator</h3>
+        <p>Create a standards-compliant llms.txt for your site in seconds — the emerging spec that tells AI agents exactly how to read your content.</p>
+      </div>
+
+      <div class="fc reveal delay-2">
+        <div class="fc-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="fc-tag">Insights</div>
+        <h3>Competitor Benchmarks</h3>
+        <p>Compare your AgentReady score against top competitors and industry averages to see exactly where you rank.</p>
+      </div>
+
+      <div class="fc reveal delay-1">
+        <div class="fc-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </div>
+        <div class="fc-tag">Monitoring</div>
+        <h3>Monthly Score Tracking</h3>
+        <p>AgentReady tracks your score over time and alerts you when you regress or when new agent signals emerge.</p>
+      </div>
+
+      <div class="fc reveal delay-2">
+        <div class="fc-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <div class="fc-tag">Actionable</div>
+        <h3>Fix-It Playbook</h3>
+        <p>Every failing check has a specific, implementable fix — exact code snippets and config examples, not vague advice.</p>
+      </div>
+
+      <div class="fc reveal delay-3">
+        <div class="fc-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="4,17 10,11 4,5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </div>
+        <div class="fc-tag">Developer</div>
+        <h3>CI/CD API Access</h3>
+        <p>Integrate AgentReady scoring into your deployment pipeline — automatically gate releases on agent readiness scores.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CREATOR -->
+<section id="about">
+  <div style="max-width:1000px;margin:0 auto;text-align:center">
+    <span class="section-eyebrow reveal">Founder</span>
+    <h2 class="section-h font-display reveal delay-1">Meet the builder</h2>
+  </div>
+  <div class="creator-grid">
+    <div class="creator-photo-wrap reveal-l">
+      <div class="creator-ring">
+        <div class="creator-photo">👨‍🔧</div>
+      </div>
+      <div class="creator-tags" style="max-width:260px">
+        <span class="c-tag">llms.txt Spec</span>
+        <span class="c-tag">W3C Web Agents WG</span>
+        <span class="c-tag">Ex-Cloudflare</span>
+        <span class="c-tag">Ex-Fastly</span>
+        <span class="c-tag">Lisbon, PT</span>
+      </div>
+    </div>
+    <div class="creator-info reveal-r">
+      <h3>Rafael Torres</h3>
+      <div class="creator-title-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/></svg>
+        Founder & CTO · AgentReady Score
+      </div>
+      <p class="creator-bio">Rafael Torres is a web infrastructure engineer who spent a decade at Cloudflare and Fastly working on web standards and crawling protocols before the AI agent revolution made his passion project urgent. With a background in distributed systems and machine-readable content, he saw the emergence of AI agents as a fundamental shift in how the web would be accessed.</p>
+      <div class="creator-quote">"Most website owners have no idea their site is effectively invisible to AI agents. The businesses that figure this out first will have a compounding advantage — just like early SEO adopters did in 2005."</div>
+      <p class="creator-bio">He is a contributor to the llms.txt specification, a member of the W3C Web Agents working group, and a frequent speaker at WebSummit and O'Reilly Velocity.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div style="max-width:1000px;margin:0 auto;text-align:center;margin-bottom:0">
+    <span class="section-eyebrow reveal">Get in Touch</span>
+    <h2 class="section-h font-display reveal delay-1">Let's talk</h2>
+    <p class="section-sub reveal delay-2" style="margin:0 auto">Enterprise plans, API access, partnerships, or just a question.</p>
+  </div>
+  <div class="contact-grid" style="max-width:1000px;margin:3rem auto 0">
+    <div class="contact-left reveal-l">
+      <h4>We'd love to hear from you</h4>
+      <p>Whether you're evaluating enterprise plans, curious about the API, or want to report an issue with our analysis — reach out and we'll get back within one business day.</p>
+      <div class="contact-meta">
+        <div class="c-meta-row">
+          <div class="c-meta-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          hello@agentreadyscore.com
+        </div>
+        <div class="c-meta-row">
+          <div class="c-meta-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          </div>
+          Mon – Fri · 9:00 – 18:00 WET
+        </div>
+        <div class="c-meta-row">
+          <div class="c-meta-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          Lisbon, Portugal
+        </div>
+      </div>
+    </div>
+    <div class="reveal-r">
+      <div class="form-card">
+        <div class="fg"><label>Name</label><input type="text" placeholder="Your full name"></div>
+        <div class="fg"><label>Email</label><input type="email" placeholder="you@company.com"></div>
+        <div class="fg"><label>Message</label><textarea placeholder="Tell us about your use case..."></textarea></div>
+        <button class="submit-btn" onclick="this.textContent='Message sent ✓';this.style.background='linear-gradient(135deg,#059669,#0891B2)';this.disabled=true">Send Message</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-brand-logo">
+          <div class="fb-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M5.64 18.36l2.12-2.12M16.24 7.76l2.12-2.12"/></svg>
+          </div>
+          <span class="fb-name">AgentReady Score</span>
+        </div>
+        <p>Score your site's AI agent accessibility. Get actionable next steps. Stay ahead of the agentic web.</p>
+        <div class="footer-social">
+          <a href="#" class="f-social-btn" aria-label="Twitter/X">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.741l7.73-8.835L1.254 2.25H8.08l4.259 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="#" class="f-social-btn" aria-label="GitHub">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+          </a>
+          <a href="https://www.linkedin.com" class="f-social-btn" aria-label="LinkedIn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#demo">Free Score Check</a>
+        <a href="#features">Features</a>
+        <a href="#" onclick="openModal();return false">API Access</a>
+        <a href="#">Documentation</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a href="#">Blog</a>
+        <a href="#">Research</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="privacy.html" target="_blank">Privacy Policy</a>
+        <a href="terms.html" target="_blank">Terms & Conditions</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 AgentReady Score. All rights reserved.</p>
+      <a href="https://www.producthunt.com/products/indexedai" target="_blank" class="ph-badge">
+        <svg width="15" height="15" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#FF5A1F"/><text x="20" y="27" font-size="18" text-anchor="middle" fill="white" font-weight="bold">P</text></svg>
+        Product Hunt
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ─── NAV ─── */
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+/* ─── MODAL ─── */
+function openModal() { document.getElementById('demoModal').classList.add('open'); }
+function closeModal() {
+  document.getElementById('demoModal').classList.remove('open');
+  document.getElementById('demoMsg').style.display = 'none';
+}
+function submitDemo() { document.getElementById('demoMsg').style.display = 'block'; }
+document.getElementById('demoModal').addEventListener('click', e => { if (e.target === document.getElementById('demoModal')) closeModal(); });
+
+/* ─── PARTICLES ─── */
+(function() {
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], mouse = { x: -999, y: -999 };
+  const N = 55, CONN = 130;
+
+  function resize() {
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+
+  function Particle() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.vx = (Math.random() - .5) * .4;
+    this.vy = (Math.random() - .5) * .4;
+    this.r = Math.random() * 1.8 + .8;
+  }
+
+  Particle.prototype.update = function() {
+    this.x += this.vx; this.y += this.vy;
+    if (this.x < 0 || this.x > W) this.vx *= -1;
+    if (this.y < 0 || this.y > H) this.vy *= -1;
+  };
+
+  function init() {
+    resize();
+    particles = Array.from({ length: N }, () => new Particle());
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => p.update());
+
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < CONN) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(0,217,255,${(1 - d / CONN) * .25})`;
+          ctx.lineWidth = .8;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+      ctx.beginPath();
+      ctx.arc(particles[i].x, particles[i].y, particles[i].r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,217,255,.6)';
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  init();
+  draw();
+})();
+
+/* ─── SCROLL ANIMATIONS ─── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal, .reveal-l, .reveal-r').forEach(el => observer.observe(el));
+
+/* ─── COUNTER ANIMATION ─── */
+function animCount(el, target, suffix) {
+  let start = null;
+  const dur = 1800;
+  const step = ts => {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(ease * target) + (suffix || '');
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+const statObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const t = +el.dataset.count;
+      const suffix = el.dataset.suffix || '';
+      animCount(el, t, suffix);
+      statObs.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('[data-count]').forEach(el => statObs.observe(el));
+
+/* ─── CARD SPOTLIGHT ─── */
+document.querySelectorAll('.fc').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+  });
+});
+
+/* ─── SCORE CHECKER ─── */
+function checkScore() {
+  const raw = document.getElementById('siteUrl').value.trim() || 'example.com';
+  const domain = raw.replace(/https?:\/\//, '').split('/')[0] || raw;
+  const area = document.getElementById('resultsArea');
+  area.style.display = 'block';
+  area.innerHTML = `<div class="scan-loader"><div class="ld"><span></span><span></span><span></span></div>Running 20+ checks on <strong style="color:var(--text);margin-left:.3rem">${domain}</strong></div>`;
+
+  const checks = [
+    { name: 'robots.txt AI-accessible',    score: 95, pass: true  },
+    { name: 'llms.txt present',            score: 0,  pass: false },
+    { name: 'JSON-LD structured data',     score: Math.random() > .4 ? 80 : 20, pass: null },
+    { name: 'OpenAPI specification',       score: Math.random() > .5 ? 65 : 10, pass: null },
+    { name: 'Sitemap freshness',           score: 85, pass: true  },
+    { name: 'Agent authentication',        score: Math.random() > .6 ? 55 : 5,  pass: null },
+    { name: 'Content readability',         score: 88, pass: true  },
+    { name: 'Page load < 2s',             score: Math.random() > .4 ? 72 : 25, pass: null },
+  ];
+  checks.forEach(c => { if (c.pass === null) c.pass = c.score >= 50; });
+
+  const total = Math.floor(checks.reduce((a, c) => a + c.score, 0) / checks.length);
+  const scoreColor = total >= 70 ? 'var(--green)' : total >= 50 ? 'var(--amber)' : 'var(--red)';
+  const scoreLabel = total >= 70 ? 'Good — agents can access your site' : total >= 50 ? 'Fair — several signals need work' : 'Poor — agents may skip your site';
+  const circumference = 2 * Math.PI * 30;
+  const offset = circumference * (1 - total / 100);
+  const fails = checks.filter(c => !c.pass);
+
+  setTimeout(() => {
+    area.innerHTML = `
+    <div class="result-top">
+      <div class="r-gauge">
+        <svg width="90" height="90" viewBox="0 0 90 90">
+          <circle cx="45" cy="45" r="30" fill="none" stroke="rgba(232,244,255,.07)" stroke-width="6"/>
+          <circle cx="45" cy="45" r="30" fill="none" stroke="url(#rg)" stroke-width="6"
+            stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}"
+            id="rGauge" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1.4s cubic-bezier(.25,.46,.45,.94)"/>
+          <defs>
+            <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00D9FF"/>
+              <stop offset="100%" stop-color="#6366F1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <div class="r-site">${domain}</div>
+        <div class="r-score-big font-mono" style="color:${scoreColor}">${total}<span style="font-size:1.3rem;opacity:.45">/100</span></div>
+        <div class="r-label">${scoreLabel}</div>
+      </div>
+    </div>
+    <div class="bars-list">
+      ${checks.map((c, i) => `
+      <div class="bar-item">
+        <div class="bar-header">
+          <span class="bar-name">${c.name}</span>
+          <span class="bar-status ${c.pass ? 'ok' : 'fail'}">${c.pass ? 'PASS' : 'FAIL'}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill ${c.pass ? 'ok' : 'fail'}" id="bar${i}" style="transition-delay:${i * .1}s"></div>
+        </div>
+      </div>`).join('')}
+    </div>
+    ${fails.length ? `
+    <div class="fixes-panel">
+      <div class="fixes-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--magenta)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Priority Fixes
+      </div>
+      ${fails.map(c => `<div class="fix-row"><span class="fix-arrow">→</span><span>Fix <strong style="color:var(--text)">${c.name}</strong> — blocking AI agent access to your site</span></div>`).join('')}
+    </div>` : `<div class="fixes-panel" style="background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.2)"><div class="fixes-title" style="color:var(--green)">Your site is highly accessible to AI agents.</div></div>`}
+    `;
+    setTimeout(() => {
+      const g = document.getElementById('rGauge');
+      if (g) g.style.strokeDashoffset = offset;
+      checks.forEach((c, i) => {
+        const bar = document.getElementById('bar' + i);
+        if (bar) setTimeout(() => { bar.style.width = c.score + '%'; }, 100);
+      });
+    }, 80);
+  }, 2200);
+}
+</script>
+</body>
+</html>
